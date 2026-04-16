@@ -36,10 +36,25 @@ addons/rafaelia_core/
 - Colapso estável/exploratório por limiar de delta (`|C-H|`).
 - Permutação multinível por mistura xorshift + rotação + FNV-1a.
 
+## RMR Engine (executável real)
+
+Engine C de baixa abstração para pipeline cognitivo com:
+
+- tokenização zero-copy por tabela (`uint8_t -> token`);
+- hash multiplicativo estilo phi (`0x9E3779B9`);
+- gating esparso por limiar (`score >= threshold`);
+- processamento branch-light com máscara;
+- validação CRC32 incremental.
+
+API pública em `include/rmr_engine.h`:
+
+- `rmr_engine_init(...)`
+- `rmr_engine_run(...)`
+
 ## Build
 
 No CMake do repositório, o addon é opcional:
 
 - `-DTINYGPT_BUILD_RAFAELIA_ADDON=ON`
 
-Em arquiteturas não AArch64 o build do addon é pulado automaticamente.
+Em arquiteturas não AArch64 o núcleo ASM é pulado automaticamente e o RMR Engine em C continua disponível.
