@@ -1,52 +1,60 @@
-# Arquitetura Inicial do Addon RafaelIA
+# Arquitetura do Addon RafaelIA
 
-## 1) Princípio de separação
+## 1) Separação estrutural
 
-O addon RafaelIA é mantido fora do núcleo do TinyGPT para garantir:
+O addon fica em `addons/rafaelia_core` para manter:
 
 - independência autoral;
-- evolução técnica desacoplada;
-- licenciamento separado;
-- integração opcional por interface estável.
+- integração opcional;
+- risco de regressão reduzido no TinyGPT.
 
-## 2) Camadas
+## 2) Núcleo de execução (AArch64)
 
-### Camada A — ABI pública
+Arquivo principal: `asm/arm64/vectra_pulse.S`.
 
-Arquivo: `include/rafaelia_contract.h`
+Características:
 
-Define quatro pontos de entrada estáveis:
+- estado interno fixo em `.bss` (32 bytes);
+- sem alocação dinâmica;
+- sem dependências externas;
+- comandos básicos de registrador e memória;
+- fluxo determinístico com custo previsível.
 
-1. `vectra_pulse_init(seed)`
-2. `vectra_pulse_step(c_in_q16, h_in_q16)`
-3. `vectra_pulse_collapse()`
-4. `vectra_pulse_inject(data, len)`
+## 3) Modelo interno
 
-### Camada B — Núcleo de execução (ASM ARM64)
+### Estado estático
 
-Arquivo: `asm/arm64/vectra_pulse.S`
+- `seed` (64-bit)
+- `acc` (64-bit)
+- `phase` (32-bit, período 42)
+- `coherence_q16` (32-bit)
+- `entropy_q16` (32-bit)
+- `flags` (32-bit)
 
-Objetivo:
+### Atualização por passo
 
-- permitir execução determinística de baixa latência;
-- manter controle explícito sobre registradores e layout de dados;
-- abrir caminho para otimizações de cache, prefetch e SIMD.
+- EMA com `alpha=0.25` em aritmética inteira (`>>2`)
+- mistura multinível no acumulador (`xorshift`, `ror`, `xor`, `add`)
 
-### Camada C — Governança técnica
+### Colapso
 
-Arquivo: `docs/COMPLIANCE.md`
+- `delta = abs(C-H)`
+- `flags=1` (estável) quando `delta <= threshold`
+- `flags=2` (exploratório) no restante
 
-Mantém matriz de conformidade para segurança, privacidade, qualidade e rastreabilidade.
+### Injeção
 
-## 3) Estratégia de integração (sem quebra)
+- stream de bytes processado por FNV-1a 64-bit
+- fase atualizada por redução modular
 
-- O TinyGPT permanece intacto.
-- A integração ocorre por ponte C/ABI (FFI), opcional.
-- O addon pode ser compilado e testado de forma isolada.
+## 4) Integração com TinyGPT
 
-## 4) Roadmap curto
+- contrato ABI C em `include/rafaelia_contract.h`
+- build controlado por `TINYGPT_BUILD_RAFAELIA_ADDON`
+- addon compilado como biblioteca estática isolada
 
-1. Implementar estado interno Q16.16 e invariantes.
-2. Adicionar testes de contrato ABI e sanidade numérica.
-3. Criar benchmark de latência/cache para rotinas críticas.
-4. Integrar build opcional (feature flag), sem alterar execução padrão.
+## 5) Evolução sugerida
+
+1. snapshots binários de estado para replay determinístico;
+2. testes de sanidade Q16.16 e estabilidade de fase;
+3. integração de telemetria opcional sem alterar caminho crítico.

@@ -1,22 +1,26 @@
-# RafaelIA Addon (Início)
+# RafaelIA Addon (integração inicial)
 
-Este documento marca o início da documentação do núcleo autoral RafaelIA dentro do repositório, mantendo separação do TinyGPT.
+Este documento descreve a entrada do núcleo RafaelIA como addon separado no repositório.
 
-## Diretriz principal
+## Premissas aplicadas
 
-- **TinyGPT permanece sem alterações estruturais internas para o addon**.
-- O addon vive em `addons/rafaelia_core` com documentação e licença próprias.
+- TinyGPT permanece funcional sem depender do addon.
+- O addon é opcional no build (`TINYGPT_BUILD_RAFAELIA_ADDON`).
+- O núcleo é isolado em `addons/rafaelia_core` com ABI C própria.
 
-## Entregas iniciais
+## Entregas desta etapa
 
-- Estrutura de diretórios para ASM, headers e docs.
-- Contrato ABI mínimo (`rafaelia_contract.h`).
-- Esqueleto AArch64 (`vectra_pulse.S`).
-- Arquivos de licença/notice separados.
-- Matriz inicial de compliance.
+- estrutura de diretórios dedicada para ASM/headers/docs;
+- núcleo ARM64 com estado estático e operações determinísticas;
+- contrato ABI ampliado com leitura de estado (`vectra_pulse_read`);
+- CMake do addon para compilação isolada;
+- documentação de arquitetura/compliance e licença separada.
 
-## Próxima etapa sugerida
+## Build
 
-1. Criar build opcional do addon.
-2. Adicionar testes de contrato.
-3. Conectar chamada do addon via ponte opcional sem acoplamento rígido.
+```bash
+cmake -S . -B build -DTINYGPT_BUILD_RAFAELIA_ADDON=ON
+cmake --build build -j
+```
+
+> Em arquiteturas sem AArch64, o addon é ignorado sem quebrar o build geral.

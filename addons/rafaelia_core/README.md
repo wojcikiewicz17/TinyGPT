@@ -1,35 +1,45 @@
 # RafaelIA Core Addon (Standalone)
 
-Este diretório inicia a estrutura do **núcleo autoral RafaelIA** como addon separado do TinyGPT.
+Addon autoral separado do TinyGPT com execução de baixo nível em AArch64.
 
 ## Objetivo
 
-- Manter o TinyGPT intacto.
-- Isolar o núcleo RafaelIA em uma árvore própria.
-- Definir contrato de integração mínimo (ABI C).
-- Preparar base de documentação técnica, conformidade e licença separada.
+- preservar o TinyGPT sem mudanças invasivas;
+- manter o núcleo RafaelIA isolado, rastreável e com licença própria;
+- operar com baixa fricção (estado estático, sem GC, sem dependências externas no núcleo ASM).
 
 ## Estrutura
 
 ```text
 addons/rafaelia_core/
-  asm/arm64/           # implementação base em assembler AArch64
-  include/             # headers de contrato público
-  docs/                # arquitetura e conformidade
-  LICENSE-RAFAELIA.txt # licença separada do addon
-  NOTICE-RAFAELIA.txt  # aviso de autoria e termos adicionais
+  asm/arm64/vectra_pulse.S     # núcleo AArch64
+  include/rafaelia_contract.h  # ABI C mínima
+  docs/ARCHITECTURE.md
+  docs/COMPLIANCE.md
+  CMakeLists.txt               # build opcional e isolado
+  LICENSE-RAFAELIA.txt
+  NOTICE-RAFAELIA.txt
 ```
 
-## Status inicial
+## ABI pública
 
-- [x] Estrutura de pastas criada
-- [x] Header de contrato (`include/rafaelia_contract.h`)
-- [x] Esqueleto ARM64 (`asm/arm64/vectra_pulse.S`)
-- [x] Documentação inicial
-- [x] Licença e notice separados
+- `vectra_pulse_init(seed)`
+- `vectra_pulse_step(c_in_q16, h_in_q16)`
+- `vectra_pulse_collapse()`
+- `vectra_pulse_inject(data, len)`
+- `vectra_pulse_read(phase, coherence_q16, entropy_q16, flags)`
 
-## Próximos passos sugeridos
+## Semântica operacional
 
-1. Adicionar build opcional para o addon sem alterar o fluxo padrão do TinyGPT.
-2. Criar testes de sanidade para ABI e invariantes Q16.16.
-3. Definir política de auditoria técnica/legal em `docs/COMPLIANCE.md`.
+- Q16.16 para coerência/entropia.
+- EMA sem alocação dinâmica: `C=(3*C+C_in)>>2`, `H=(3*H+H_in)>>2`.
+- Colapso estável/exploratório por limiar de delta (`|C-H|`).
+- Permutação multinível por mistura xorshift + rotação + FNV-1a.
+
+## Build
+
+No CMake do repositório, o addon é opcional:
+
+- `-DTINYGPT_BUILD_RAFAELIA_ADDON=ON`
+
+Em arquiteturas não AArch64 o build do addon é pulado automaticamente.
