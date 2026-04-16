@@ -68,3 +68,7 @@ Em arquiteturas não AArch64 o núcleo ASM é pulado automaticamente e o RMR Eng
 - Entropia operacional `H ~= U/256 + T/N` e versão milli `entropy_milli`.
 - Integridade por FNV-1a (`h=(h xor byte)*0x100000001B3`) + CRC32 incremental.
 - Agregação Merkle-lite (`rmr_merkle_root64`) para folhas 64-bit.
+
+- FFT/DFT discreta com `rmr_dft_magnitude` e correlação normalizada cardio com `rmr_cardio_resonance`.
+- Invariantes de malha com `rmr_gcd_u32` e `rmr_stride_is_coprime` (`gcd(Δ,size)=1`).
+- Dinâmica espiral/força com `rmr_spiral_pow_sqrt3_over_2` e `rmr_force_next`.

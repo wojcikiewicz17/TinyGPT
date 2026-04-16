@@ -1,6 +1,11 @@
 #include "rmr_engine.h"
 
+#include <math.h>
 #include <string.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 static uint8_t rmr_token_table[256];
 static uint32_t rmr_crc_table[256];
@@ -42,6 +47,32 @@ static void rmr_prepare_tables(void) {
     rmr_tables_ready = 1;
 }
 
+uint64_t rmr_fnv1a64_step(uint64_t h, uint8_t byte) {
+    return (h ^ (uint64_t)byte) * 0x100000001B3ULL;
+}
+
+uint32_t rmr_gcd_u32(uint32_t a, uint32_t b) {
+    while (b != 0u) {
+        uint32_t t = a % b;
+        a = b;
+        b = t;
+    }
+    return a;
+}
+
+int rmr_stride_is_coprime(uint32_t delta, uint32_t size) {
+    return (size > 0u) && (rmr_gcd_u32(delta, size) == 1u);
+}
+
+double rmr_spiral_pow_sqrt3_over_2(uint32_t n) {
+    return pow(0.86602540378443864676, (double)n);
+}
+
+double rmr_force_next(double f_n) {
+    const double s = sin(279.0 * (M_PI / 180.0));
+    return (f_n * 0.86602540378443864676) - (M_PI * s);
+}
+
 uint32_t rmr_entropy_milli(const uint8_t* input, size_t input_len) {
     if (input == NULL || input_len == 0) {
         return 0;
@@ -78,11 +109,59 @@ uint64_t rmr_merkle_root64(const uint64_t* leaves, size_t leaf_count) {
 
     uint64_t acc = 0xCBF29CE484222325ULL;
     for (size_t i = 0; i < leaf_count; ++i) {
+        acc = rmr_fnv1a64_step(acc, (uint8_t)(leaves[i] & 0xFFu));
         acc ^= leaves[i];
         acc *= 0x100000001B3ULL;
         acc = rmr_rotl64(acc, 13u);
     }
     return acc;
+}
+
+void rmr_dft_magnitude(const float* signal, size_t n, double* spectrum, size_t bins) {
+    if (signal == NULL || spectrum == NULL || n == 0 || bins == 0) {
+        return;
+    }
+
+    for (size_t k = 0; k < bins; ++k) {
+        double re = 0.0;
+        double im = 0.0;
+        for (size_t t = 0; t < n; ++t) {
+            const double angle = (2.0 * M_PI * (double)k * (double)t) / (double)n;
+            re += (double)signal[t] * cos(angle);
+            im -= (double)signal[t] * sin(angle);
+        }
+        spectrum[k] = sqrt(re * re + im * im);
+    }
+}
+
+void rmr_cardio_resonance(const double* spectrum,
+                          const double* cardio_kernel,
+                          size_t bins,
+                          rmr_resonance_t* out) {
+    if (out == NULL) {
+        return;
+    }
+    out->dot = 0.0;
+    out->norm_signal = 0.0;
+    out->norm_cardio = 0.0;
+    out->resonance = 0.0;
+
+    if (spectrum == NULL || cardio_kernel == NULL || bins == 0) {
+        return;
+    }
+
+    for (size_t i = 0; i < bins; ++i) {
+        out->dot += spectrum[i] * cardio_kernel[i];
+        out->norm_signal += spectrum[i] * spectrum[i];
+        out->norm_cardio += cardio_kernel[i] * cardio_kernel[i];
+    }
+
+    out->norm_signal = sqrt(out->norm_signal);
+    out->norm_cardio = sqrt(out->norm_cardio);
+
+    if (out->norm_signal > 0.0 && out->norm_cardio > 0.0) {
+        out->resonance = out->dot / (out->norm_signal * out->norm_cardio);
+    }
 }
 
 void rmr_engine_init(rmr_engine_t* engine, const rmr_config_t* cfg) {
@@ -163,21 +242,17 @@ size_t rmr_engine_run(rmr_engine_t* engine,
         unique += (uint32_t)__builtin_popcount(unique_bitmap[i]);
     }
 
-    /* H ~= U/256 + T/N (formula 14/43) em Q16.16 */
     const uint32_t h_u_q16 = (unique << 16u) / 256u;
     const uint32_t h_t_q16 = (input_len > 0) ? (uint32_t)(((uint64_t)transitions << 16u) / (uint32_t)input_len) : 0u;
     const uint32_t h_in_q16 = (h_u_q16 + h_t_q16) >> 1u;
 
-    /* C_in derivado da densidade de passagem */
     const uint32_t c_in_q16 = (input_len > 0) ? (uint32_t)(((uint64_t)out_n << 16u) / (uint32_t)input_len) : 0u;
 
-    /* EMA: X_{t+1}=(1-a)X_t + a X_in */
     const uint32_t a = engine->alpha_q16;
     const uint32_t om = 0x10000u - a;
     engine->coherence_q16 = rmr_q16_mul(om, engine->coherence_q16) + rmr_q16_mul(a, c_in_q16);
     engine->entropy_q16 = rmr_q16_mul(om, engine->entropy_q16) + rmr_q16_mul(a, h_in_q16);
 
-    /* phi=(1-H)*C */
     const uint32_t one_minus_h = (engine->entropy_q16 >= 0x10000u) ? 0u : (0x10000u - engine->entropy_q16);
     engine->phi_q16 = rmr_q16_mul(one_minus_h, engine->coherence_q16);
 

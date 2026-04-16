@@ -26,3 +26,7 @@ target_include_directories(RafaelIA_core PUBLIC
 set_target_properties(RafaelIA_core PROPERTIES
     OUTPUT_NAME "rafaelia_core"
 )
+
+if (UNIX)
+    target_link_libraries(RafaelIA_core PUBLIC m)
+endif ()
