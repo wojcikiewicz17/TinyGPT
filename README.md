@@ -56,6 +56,9 @@ const std::string MODEL_DIR = "path to model files (huggingface repo)";
 ./scripts/bootstrap_submodules.sh
 ```
 
+> `cmake` now supports automatic dependency bootstrap by default (`-DTINYGPT_AUTO_FETCH_DEPS=ON`).
+> If submodules are missing, configure will attempt `git clone --depth 1` for TinyTorch/pcre2/utf8proc (and googletest when tests are enabled).
+
 ### 4. Build and Run
 
 ```bash
@@ -64,10 +67,10 @@ cmake --build ./build --config Release --parallel
 ctest --test-dir ./build --output-on-failure
 ```
 
-This will generate the executable file and copy assets to directory `demo/bin`, then you can run the demo:
+This will generate the executable file under `build/demo` and copy assets next to the binary, then you can run the demo:
 
 ```bash
-cd demo/bin
+cd build/demo
 ./TinyGPT_demo
 ```
 
