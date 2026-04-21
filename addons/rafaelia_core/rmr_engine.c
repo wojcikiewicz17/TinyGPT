@@ -53,6 +53,10 @@ static inline uint32_t rmr_mix_token_fast(uint32_t token, uint32_t rolling) {
     return rmr_rotl32_fast(out, 1u);
 }
 
+uint32_t rmr_arch_identity_hex(void) {
+    return (uint32_t)RAFAELIA_ARCH_ID_HEX;
+}
+
 const char* rmr_backend_name(void) {
 #if defined(__aarch64__)
     return "aarch64-inline-asm";

@@ -54,10 +54,11 @@ jobs:
         with:
           ndk-version: r27c
 
-      - name: Build RafaelIA addon (armeabi-v7a + arm64-v8a)
+      - name: Build RafaelIA addon (armeabi-v7a + arm64-v8a + x86 + x86_64)
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           ANDROID_API_LEVEL: "24"
+          ANDROID_ABI_LIST: "armeabi-v7a arm64-v8a x86 x86_64"
         run: addons/rafaelia_core/scripts/build_android_addon.sh
 
       - name: Upload Android addon artifacts

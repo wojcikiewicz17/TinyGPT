@@ -14,3 +14,10 @@ Testing
 
 assets/gpt2/model_file.data
 assets/gpt2/*.safetensors
+
+# RafaelIA build/generated artifacts
+addons/rafaelia_core/*.o
+addons/rafaelia_core/*.elf
+addons/rafaelia_core/*.pyc
+addons/rafaelia_core/*runner
+build-android-rafaelia/

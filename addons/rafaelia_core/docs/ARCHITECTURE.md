@@ -58,3 +58,23 @@ Características:
 1. snapshots binários de estado para replay determinístico;
 2. testes de sanidade Q16.16 e estabilidade de fase;
 3. integração de telemetria opcional sem alterar caminho crítico.
+
+
+## 6) Identidade de arquitetura em hexadecimal
+
+Para orquestração determinística de build/release, o core exporta `rmr_arch_identity_hex()` e injeta `RAFAELIA_ARCH_ID_HEX` via CMake.
+
+Resolução de backend:
+
+- Android: prioriza `ANDROID_ABI` (fonte de verdade em cross-compile).
+- Não-Android: usa `CMAKE_SYSTEM_PROCESSOR`.
+
+Mapa primário (7 identidades):
+
+- `0xA0640001` arm64
+- `0xA0320002` arm32
+- `0xA0860003` x86
+- `0xA8640004` x86_64
+- `0xA7640005` riscv64
+- `0xAC640006` ppc64le
+- `0xA3900007` s390x
