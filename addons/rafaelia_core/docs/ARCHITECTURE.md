@@ -78,3 +78,14 @@ Mapa primário (7 identidades):
 - `0xA7640005` riscv64
 - `0xAC640006` ppc64le
 - `0xA3900007` s390x
+
+
+## 7) Modo estrito ASM
+
+Quando `RAFAELIA_REQUIRE_ASM=ON`, o configure falha se o backend selecionado não for assembly nativo.
+
+Uso recomendado para release low-level:
+
+- Android: `ANDROID_ABI` em `armeabi-v7a` ou `arm64-v8a`;
+- Root CMake: `TINYGPT_ASM_ONLY=ON`;
+- CI: artifact apenas do target `RafaelIA_core`.
