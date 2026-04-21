@@ -164,3 +164,15 @@ Este repositório possui workflow de CI em `.github/workflows/ci.yml` com:
 - build em Release
 - execução de testes via `ctest`
 - empacotamento e upload de artefatos (demo e testes)
+
+
+## ASM shell mode (RafaelIA only)
+
+Para operar em modo low-level sem superfície C++/Python do TinyGPT:
+
+```bash
+cmake -S . -B build-asm-shell -DCMAKE_BUILD_TYPE=Release -DTINYGPT_ASM_ONLY=ON
+cmake --build build-asm-shell --target RafaelIA_core --parallel
+```
+
+Esse modo não entra em `src/`, não exige submódulos de inferência e constrói apenas o core nativo RafaelIA.
