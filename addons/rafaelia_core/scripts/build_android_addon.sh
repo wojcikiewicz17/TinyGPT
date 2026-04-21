@@ -19,8 +19,14 @@ else
   ABIS=("${DEFAULT_ABIS[@]}")
 fi
 
-rm -rf "${OUT_DIR}"
-mkdir -p "${OUT_DIR}/artifacts"
+python3 - <<PY_CLEAN
+import shutil
+from pathlib import Path
+out = Path(r"${OUT_DIR}")
+if out.exists():
+    shutil.rmtree(out)
+out.joinpath("artifacts").mkdir(parents=True, exist_ok=True)
+PY_CLEAN
 
 for ABI in "${ABIS[@]}"; do
   BUILD_DIR="${OUT_DIR}/${ABI}"
@@ -29,12 +35,8 @@ for ABI in "${ABIS[@]}"; do
     -DANDROID_ABI="${ABI}" \
     -DANDROID_PLATFORM="android-${API_LEVEL}" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DTINYGPT_BUILD_DEMO=OFF \
-    -DTINYGPT_BUILD_TEST=OFF \
-    -DTINYGPT_BUILD_PYBINDING=OFF \
-    -DTINYGPT_BUILD_RAFAELIA_ADDON=ON \
-    -DTINYGPT_USE_CUDA=OFF \
-    -DTINYGPT_USE_NCCL=OFF
+    -DTINYGPT_ASM_ONLY=ON \
+    -DRAFAELIA_ENABLE_NEON=ON
 
   cmake --build "${BUILD_DIR}" --config Release --target RafaelIA_core --parallel
 
