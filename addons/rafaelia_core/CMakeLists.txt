@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 project(RafaelIA_core C ASM)
 
 option(RAFAELIA_BUILD_ADDON "Build RafaelIA addon library" ON)
-option(RAFAELIA_REQUIRE_ASM "Fail build when no assembly backend is available" OFF)
+option(RAFAELIA_ENABLE_NEON "Enable ARM NEON tuned flags when supported" OFF)
+option(RAFAELIA_ENABLE_SIMD "Enable x86 SIMD tuned flags when supported" OFF)
 
 if (NOT RAFAELIA_BUILD_ADDON)
     return()
@@ -108,9 +109,20 @@ set_target_properties(RafaelIA_core PROPERTIES
     OUTPUT_NAME "rafaelia_core"
 )
 
+if (RAFAELIA_ENABLE_NEON AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(armv7|armv7l|arm)$")
+    target_compile_options(RafaelIA_core PRIVATE -mfpu=neon)
+elseif (RAFAELIA_ENABLE_NEON AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
+    target_compile_options(RafaelIA_core PRIVATE -march=armv8-a+simd)
+endif ()
+
+if (RAFAELIA_ENABLE_SIMD AND CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|amd64|x86|i[3-6]86)$")
+    target_compile_options(RafaelIA_core PRIVATE -msse4.2)
+endif ()
+
 if (UNIX)
     target_link_libraries(RafaelIA_core PUBLIC m)
 endif ()
 
 message(STATUS "RafaelIA backend identity: ${RAFAELIA_ARCH_ID_NAME} (${RAFAELIA_ARCH_ID_HEX})")
-message(STATUS "RafaelIA backend asm-only requirement: RAFAELIA_REQUIRE_ASM=${RAFAELIA_REQUIRE_ASM}")
+message(STATUS "RafaelIA NEON flags enabled: ${RAFAELIA_ENABLE_NEON}")
+message(STATUS "RafaelIA SIMD flags enabled: ${RAFAELIA_ENABLE_SIMD}")
