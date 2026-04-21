@@ -93,6 +93,39 @@ demo output:
 [INFO] Time cost: 1907 ms, speed: 83.90 token/s
 ```
 
+## ASM-only low-level pipeline (no TinyGPT core dependencies)
+
+Use this mode to build only the RafaelIA low-level backend (ASM when available, portable fallback otherwise):
+
+```bash
+scripts/build_asm_only.sh
+```
+
+This path enables `TINYGPT_ASM_ONLY=ON`, disables demo/tests/pybinding, and forces only `addons/rafaelia_core` to be built.
+
+Android NDK lane (ABIs: `armeabi-v7a arm64-v8a x86 x86_64`):
+
+```bash
+export ANDROID_NDK_HOME=/path/to/android-ndk
+addons/rafaelia_core/scripts/build_android_addon.sh
+```
+
+## Full repository ASM conversion lane
+
+To generate ASM units for all `.c/.cpp/.py` files and build a pure ASM artifact set:
+
+```bash
+scripts/build_all_asm_repo.sh
+```
+
+Outputs:
+- `generated/all_asm/manifest.json` (mapping source -> generated ASM symbol)
+- `build-all-asm/libtinygpt_all_asm.a`
+- `build-all-asm/addons/rafaelia_core/librafaelia_core.a`
+- `build-all-asm/geolm/libgeolm_core.a`
+
+GeoLM ASM core API is exported by `geolm/include/geolm_api.h` and built from `geolm/asm/geolm_core.S`.
+
 ## Python binding
 
 ```python
