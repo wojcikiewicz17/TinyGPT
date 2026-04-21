@@ -12,28 +12,56 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 option(TINYGPT_USE_CUDA "Enable TinyTorch CUDA backend" OFF)
 option(TINYGPT_USE_NCCL "Enable TinyTorch NCCL backend" OFF)
 
-function(require_dependency_dir dir_path init_hint)
+function(require_dependency_dir dir_path init_hint git_url)
     if (NOT EXISTS "${dir_path}/CMakeLists.txt")
-        message(FATAL_ERROR
-                "Dependência ausente em '${dir_path}'.\\n"
-                "Execute: ${init_hint}")
+        if (TINYGPT_AUTO_FETCH_DEPS)
+            find_package(Git QUIET)
+            if (NOT GIT_FOUND)
+                message(FATAL_ERROR
+                        "Dependência ausente em '${dir_path}' e Git não encontrado para auto-bootstrap.\\n"
+                        "Execute: ${init_hint}")
+            endif ()
+
+            message(STATUS "Dependência ausente em '${dir_path}'. Auto-bootstrap via git clone de ${git_url}")
+            execute_process(
+                    COMMAND "${GIT_EXECUTABLE}" clone --depth 1 --recurse-submodules --shallow-submodules "${git_url}" "${dir_path}"
+                    RESULT_VARIABLE dep_clone_result
+                    OUTPUT_VARIABLE dep_clone_stdout
+                    ERROR_VARIABLE dep_clone_stderr
+            )
+            if (NOT dep_clone_result EQUAL 0)
+                message(FATAL_ERROR
+                        "Falha ao clonar dependência '${dir_path}' de '${git_url}'.\\n"
+                        "stdout:\\n${dep_clone_stdout}\\n"
+                        "stderr:\\n${dep_clone_stderr}\\n"
+                        "Fallback manual: ${init_hint}")
+            endif ()
+        else ()
+            message(FATAL_ERROR
+                    "Dependência ausente em '${dir_path}'.\\n"
+                    "Execute: ${init_hint}")
+        endif ()
     endif ()
 endfunction()
 
 require_dependency_dir(
         "${THIRD_PARTY_DIR}/TinyTorch"
-        "./scripts/bootstrap_submodules.sh")
+        "./scripts/bootstrap_submodules.sh"
+        "https://github.com/keith2018/TinyTorch.git")
 require_dependency_dir(
         "${THIRD_PARTY_DIR}/pcre2"
-        "./scripts/bootstrap_submodules.sh")
+        "./scripts/bootstrap_submodules.sh"
+        "https://github.com/PCRE2Project/pcre2.git")
 require_dependency_dir(
         "${THIRD_PARTY_DIR}/utf8proc"
-        "./scripts/bootstrap_submodules.sh")
+        "./scripts/bootstrap_submodules.sh"
+        "https://github.com/JuliaStrings/utf8proc.git")
 
 if (${TINYGPT_BUILD_PYBINDING})
     require_dependency_dir(
             "${THIRD_PARTY_DIR}/pybind11"
-            "./scripts/bootstrap_submodules.sh")
+            "./scripts/bootstrap_submodules.sh"
+            "https://github.com/pybind/pybind11.git")
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
     set(BUILD_SHARED_LIBS OFF)
 endif ()

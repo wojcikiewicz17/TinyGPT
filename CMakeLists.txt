@@ -3,13 +3,13 @@ project(TinyGPT C CXX ASM)
 
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
-option(TINYGPT_ASM_ONLY "Build only the low-level RafaelIA shell (no C++ core, no Python binding)" OFF)
 option(TINYGPT_BUILD_PYBINDING "Whether or not to build pybinding" OFF)
 option(TINYGPT_BUILD_DEMO "Whether or not to build demo" ON)
 option(TINYGPT_BUILD_TEST "Whether or not to build the tests" ON)
 option(TINYGPT_BUILD_RAFAELIA_ADDON "Whether or not to build RafaelIA addon" OFF)
 option(TINYGPT_ASM_ONLY "Build only low-level RafaelIA addon (ASM/fallback) and skip TinyGPT core" OFF)
 option(TINYGPT_FORCE_ALL_ASM "Generate and build ASM stubs for all C/C++/Python units in repository" OFF)
+option(TINYGPT_AUTO_FETCH_DEPS "Auto-fetch missing git dependencies during CMake configure" ON)
 
 if (TINYGPT_FORCE_ALL_ASM)
     find_package(Python3 REQUIRED COMPONENTS Interpreter)
