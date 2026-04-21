@@ -9,12 +9,19 @@ endif ()
 
 set(RAFAELIA_CORE_SOURCES
     rmr_engine.c
+    vectra_dispatch.c
 )
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)$")
     list(APPEND RAFAELIA_CORE_SOURCES asm/arm64/vectra_pulse.S)
+    add_compile_definitions(RAFAELIA_ARCH_ARM64=1)
+elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "^(armv7|armv7l|arm)$")
+    list(APPEND RAFAELIA_CORE_SOURCES asm/arm32/vectra_pulse.S)
+    add_compile_definitions(RAFAELIA_ARCH_ARM32=1)
 else ()
-    message(STATUS "RafaelIA ASM core skipped: requires AArch64 (current: ${CMAKE_SYSTEM_PROCESSOR})")
+    list(APPEND RAFAELIA_CORE_SOURCES vectra_fallback.c)
+    add_compile_definitions(RAFAELIA_ARCH_FALLBACK=1)
+    message(STATUS "RafaelIA ASM core skipped: unsupported CPU (${CMAKE_SYSTEM_PROCESSOR}); using portable fallback")
 endif ()
 
 add_library(RafaelIA_core STATIC ${RAFAELIA_CORE_SOURCES})
