@@ -69,10 +69,14 @@ O backend ativo pode ser consultado por `vectra_backend_name()`.
 
 ### Android NDK (CI e local)
 
-Build automatizado para `armeabi-v7a`, `arm64-v8a`, `x86` e `x86_64` (ABI list configurável por `ANDROID_ABI_LIST`):
+Build automatizado por ABI list configurável (`ANDROID_ABI_LIST`).
+
+Para modo estritamente ASM, use apenas ABIs ARM e ative `RAFAELIA_REQUIRE_ASM=1`:
 
 ```bash
 export ANDROID_NDK_HOME=/path/to/android-ndk
+export ANDROID_ABI_LIST="armeabi-v7a arm64-v8a"
+export RAFAELIA_REQUIRE_ASM=1
 addons/rafaelia_core/scripts/build_android_addon.sh
 ```
 
@@ -106,3 +110,6 @@ Sete identidades primárias mantidas no contrato:
 - `0xA7640005` riscv64
 - `0xAC640006` ppc64le
 - `0xA3900007` s390x
+
+
+No caminho CI/local, o script já força `-DTINYGPT_ASM_ONLY=ON` para evitar dependência da camada C++/Python.

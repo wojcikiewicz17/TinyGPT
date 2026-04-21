@@ -10,6 +10,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 OUT_DIR="${ROOT_DIR}/build-android-rafaelia"
 TOOLCHAIN="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake"
 API_LEVEL="${ANDROID_API_LEVEL:-24}"
+REQUIRE_ASM="${RAFAELIA_REQUIRE_ASM:-0}"
 
 DEFAULT_ABIS=("armeabi-v7a" "arm64-v8a" "x86" "x86_64")
 if [[ -n "${ANDROID_ABI_LIST:-}" ]]; then
@@ -33,6 +34,8 @@ for ABI in "${ABIS[@]}"; do
     -DTINYGPT_BUILD_TEST=OFF \
     -DTINYGPT_BUILD_PYBINDING=OFF \
     -DTINYGPT_BUILD_RAFAELIA_ADDON=ON \
+    -DTINYGPT_ASM_ONLY=ON \
+    -DRAFAELIA_REQUIRE_ASM="${REQUIRE_ASM}" \
     -DTINYGPT_USE_CUDA=OFF \
     -DTINYGPT_USE_NCCL=OFF
 
