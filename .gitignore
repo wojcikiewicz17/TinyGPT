@@ -21,3 +21,7 @@ addons/rafaelia_core/*.elf
 addons/rafaelia_core/*.pyc
 addons/rafaelia_core/*runner
 build-android-rafaelia/
+
+# generated asm conversion outputs
+generated/all_asm/
+build-all-asm/

@@ -20,8 +20,14 @@ else
   ABIS=("${DEFAULT_ABIS[@]}")
 fi
 
-rm -rf "${OUT_DIR}"
-mkdir -p "${OUT_DIR}/artifacts"
+python3 - <<PY_CLEAN
+import shutil
+from pathlib import Path
+out = Path(r"${OUT_DIR}")
+if out.exists():
+    shutil.rmtree(out)
+out.joinpath("artifacts").mkdir(parents=True, exist_ok=True)
+PY_CLEAN
 
 for ABI in "${ABIS[@]}"; do
   BUILD_DIR="${OUT_DIR}/${ABI}"
@@ -30,6 +36,8 @@ for ABI in "${ABIS[@]}"; do
     -DANDROID_ABI="${ABI}" \
     -DANDROID_PLATFORM="android-${API_LEVEL}" \
     -DCMAKE_BUILD_TYPE=Release \
+    -DTINYGPT_ASM_ONLY=ON \
+    -DRAFAELIA_ENABLE_NEON=ON
     -DTINYGPT_BUILD_DEMO=OFF \
     -DTINYGPT_BUILD_TEST=OFF \
     -DTINYGPT_BUILD_PYBINDING=OFF \

@@ -103,6 +103,26 @@ scripts/build_asm_only.sh
 
 This path enables `TINYGPT_ASM_ONLY=ON`, disables demo/tests/pybinding, and forces only `addons/rafaelia_core` to be built.
 
+Android NDK lane (ABIs: `armeabi-v7a arm64-v8a x86 x86_64`):
+
+```bash
+export ANDROID_NDK_HOME=/path/to/android-ndk
+addons/rafaelia_core/scripts/build_android_addon.sh
+```
+
+## Full repository ASM conversion lane
+
+To generate ASM units for all `.c/.cpp/.py` files and build a pure ASM artifact set:
+
+```bash
+scripts/build_all_asm_repo.sh
+```
+
+Outputs:
+- `generated/all_asm/manifest.json` (mapping source -> generated ASM symbol)
+- `build-all-asm/libtinygpt_all_asm.a`
+- `build-all-asm/addons/rafaelia_core/librafaelia_core.a`
+
 ## Python binding
 
 ```python

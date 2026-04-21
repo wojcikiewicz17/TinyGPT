@@ -49,6 +49,9 @@ jobs:
       - name: Build ASM-only pipeline
         run: scripts/build_asm_only.sh
 
+      - name: Validate ASM-only artifact
+        run: test -f build-asm-only/addons/rafaelia_core/librafaelia_core.a
+
       - name: Pack ASM-only artifacts
         run: |
           mkdir -p artifacts
@@ -59,6 +62,33 @@ jobs:
         with:
           name: rafaelia-core-host-asm-only
           path: artifacts/librafaelia_core-host.a
+          if-no-files-found: error
+
+  all-asm-repo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build full repository as ASM stubs
+        run: scripts/build_all_asm_repo.sh
+
+      - name: Validate ASM manifest and artifacts
+        run: |
+          test -f generated/all_asm/manifest.json
+          test -f build-all-asm/libtinygpt_all_asm.a
+          test -f build-all-asm/addons/rafaelia_core/librafaelia_core.a
+
+      - name: Upload full ASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: tinygpt-full-asm-artifacts
+          path: |
+            generated/all_asm/manifest.json
+            build-all-asm/libtinygpt_all_asm.a
+            build-all-asm/addons/rafaelia_core/librafaelia_core.a
           if-no-files-found: error
 
   android-native-addon:
@@ -85,7 +115,14 @@ jobs:
           RAFAELIA_REQUIRE_ASM: "1"
         run: addons/rafaelia_core/scripts/build_android_addon.sh
 
-      - name: Upload Android addon artifacts (ASM)
+      - name: Validate Android addon artifacts
+        run: |
+          test -f build-android-rafaelia/artifacts/librafaelia_core-armeabi-v7a.a
+          test -f build-android-rafaelia/artifacts/librafaelia_core-arm64-v8a.a
+          test -f build-android-rafaelia/artifacts/librafaelia_core-x86.a
+          test -f build-android-rafaelia/artifacts/librafaelia_core-x86_64.a
+
+      - name: Upload Android addon artifacts
         uses: actions/upload-artifact@v4
         with:
           name: rafaelia-core-android-static-libs-asm
