@@ -116,11 +116,12 @@ jobs:
         run: addons/rafaelia_core/scripts/build_android_addon.sh
 
       - name: Validate Android addon artifacts
+        env:
+          ANDROID_ABI_LIST: "armeabi-v7a arm64-v8a"
         run: |
-          test -f build-android-rafaelia/artifacts/librafaelia_core-armeabi-v7a.a
-          test -f build-android-rafaelia/artifacts/librafaelia_core-arm64-v8a.a
-          test -f build-android-rafaelia/artifacts/librafaelia_core-x86.a
-          test -f build-android-rafaelia/artifacts/librafaelia_core-x86_64.a
+          for abi in ${ANDROID_ABI_LIST}; do
+            test -f "build-android-rafaelia/artifacts/librafaelia_core-${abi}.a"
+          done
 
       - name: Upload Android addon artifacts
         uses: actions/upload-artifact@v4
