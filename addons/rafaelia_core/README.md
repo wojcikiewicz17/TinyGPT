@@ -28,6 +28,7 @@ addons/rafaelia_core/
 - `vectra_pulse_collapse()`
 - `vectra_pulse_inject(data, len)`
 - `vectra_pulse_read(phase, coherence_q16, entropy_q16, flags)`
+- `vectra_backend_name()`
 
 ## Semântica operacional
 
@@ -57,7 +58,13 @@ No CMake do repositório, o addon é opcional:
 
 - `-DTINYGPT_BUILD_RAFAELIA_ADDON=ON`
 
-Em arquiteturas não AArch64 o núcleo ASM é pulado automaticamente e o RMR Engine em C continua disponível.
+A seleção de backend é automática por arquitetura/flags:
+
+- `aarch64/arm64`: ASM nativo (`asm/arm64/vectra_pulse.S`);
+- `armv7/arm`: ASM nativo (`asm/arm32/vectra_pulse.S`);
+- outras arquiteturas: fallback em C (`vectra_fallback.c`).
+
+O backend ativo pode ser consultado por `vectra_backend_name()`.
 
 
 ### Mapeamento matemático implantado (núcleo RMR)

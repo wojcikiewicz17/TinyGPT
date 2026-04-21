@@ -6,11 +6,12 @@
 .text
 .align 6
 
-.global vectra_pulse_init
-.global vectra_pulse_step
-.global vectra_pulse_collapse
-.global vectra_pulse_inject
-.global vectra_pulse_read
+.global vectra_pulse_init_impl
+.global vectra_pulse_step_impl
+.global vectra_pulse_collapse_impl
+.global vectra_pulse_inject_impl
+.global vectra_pulse_read_impl
+.global vectra_backend_name
 
 // offsets da estrutura interna
 .equ OFF_SEED,      0
@@ -30,7 +31,7 @@
 // void vectra_pulse_init(uint64_t seed)
 // x0 = seed
 // -----------------------------------------------------------------------------
-vectra_pulse_init:
+vectra_pulse_init_impl:
     adrp    x9, vectra_state
     add     x9, x9, :lo12:vectra_state
 
@@ -62,7 +63,7 @@ vectra_pulse_init:
 // w0 = c_in_q16, w1 = h_in_q16
 // EMA: C=(3*C+c_in)>>2 ; H=(3*H+h_in)>>2
 // -----------------------------------------------------------------------------
-vectra_pulse_step:
+vectra_pulse_step_impl:
     adrp    x9, vectra_state
     add     x9, x9, :lo12:vectra_state
 
@@ -109,7 +110,7 @@ vectra_pulse_step:
 // void vectra_pulse_collapse(void)
 // Avalia delta=abs(C-H). Se delta <= threshold => flags bit0=1, senão bit1=1.
 // -----------------------------------------------------------------------------
-vectra_pulse_collapse:
+vectra_pulse_collapse_impl:
     adrp    x9, vectra_state
     add     x9, x9, :lo12:vectra_state
 
@@ -140,7 +141,7 @@ vectra_pulse_collapse:
 // x0=data, w1=len
 // FNV-1a 64-bit no acc interno.
 // -----------------------------------------------------------------------------
-vectra_pulse_inject:
+vectra_pulse_inject_impl:
     cbz     w1, 2f
 
     adrp    x9, vectra_state
@@ -181,7 +182,7 @@ vectra_pulse_inject:
 // uint64_t vectra_pulse_read(uint32_t* phase, uint32_t* coh, uint32_t* ent, uint32_t* flags)
 // x0=phase*, x1=coh*, x2=ent*, x3=flags* ; retorno x0=acc
 // -----------------------------------------------------------------------------
-vectra_pulse_read:
+vectra_pulse_read_impl:
     adrp    x9, vectra_state
     add     x9, x9, :lo12:vectra_state
 
@@ -205,7 +206,17 @@ vectra_pulse_read:
     ldr     x0, [x9, #OFF_ACC]
     ret
 
+
+vectra_backend_name:
+    adrp    x0, backend_name_arm64
+    add     x0, x0, :lo12:backend_name_arm64
+    ret
+
 .bss
 .align 6
 vectra_state:
     .space STATE_SIZE
+
+.section .rodata
+backend_name_arm64:
+    .asciz "arm64-asm"
