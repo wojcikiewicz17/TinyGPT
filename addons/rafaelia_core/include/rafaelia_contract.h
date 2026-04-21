@@ -28,6 +28,9 @@ uint64_t vectra_pulse_read(uint32_t* phase,
                            uint32_t* entropy_q16,
                            uint32_t* flags);
 
+/* Nome do backend selecionado em build (arm64-asm, arm32-asm ou fallback C). */
+const char* vectra_backend_name(void);
+
 #ifdef __cplusplus
 }
 #endif

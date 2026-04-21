@@ -9,6 +9,9 @@ endif ()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(TINYGPT_USE_CUDA "Enable TinyTorch CUDA backend" OFF)
+option(TINYGPT_USE_NCCL "Enable TinyTorch NCCL backend" OFF)
+
 function(require_dependency_dir dir_path init_hint)
     if (NOT EXISTS "${dir_path}/CMakeLists.txt")
         message(FATAL_ERROR
@@ -37,6 +40,8 @@ endif ()
 
 set(TINYTORCH_BUILD_DEMO OFF CACHE BOOL "" FORCE)
 set(TINYTORCH_BUILD_TEST OFF CACHE BOOL "" FORCE)
+set(TINYTORCH_USE_CUDA ${TINYGPT_USE_CUDA} CACHE BOOL "" FORCE)
+set(TINYTORCH_USE_NCCL ${TINYGPT_USE_NCCL} CACHE BOOL "" FORCE)
 add_subdirectory(${THIRD_PARTY_DIR}/TinyTorch TinyTorch)
 
 #pcre2
