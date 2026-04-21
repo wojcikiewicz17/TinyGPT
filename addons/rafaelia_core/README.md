@@ -69,10 +69,14 @@ O backend ativo pode ser consultado por `vectra_backend_name()`.
 
 ### Android NDK (CI e local)
 
-Build automatizado para `armeabi-v7a` e `arm64-v8a`:
+Build automatizado por ABI list configurável (`ANDROID_ABI_LIST`).
+
+Para modo estritamente ASM, use apenas ABIs ARM e ative `RAFAELIA_REQUIRE_ASM=1`:
 
 ```bash
 export ANDROID_NDK_HOME=/path/to/android-ndk
+export ANDROID_ABI_LIST="armeabi-v7a arm64-v8a"
+export RAFAELIA_REQUIRE_ASM=1
 addons/rafaelia_core/scripts/build_android_addon.sh
 ```
 
@@ -91,3 +95,21 @@ Artefatos gerados em `build-android-rafaelia/artifacts/`.
 - FFT/DFT discreta com `rmr_dft_magnitude` e correlação normalizada cardio com `rmr_cardio_resonance`.
 - Invariantes de malha com `rmr_gcd_u32` e `rmr_stride_is_coprime` (`gcd(Δ,size)=1`).
 - Dinâmica espiral/força com `rmr_spiral_pow_sqrt3_over_2` e `rmr_force_next`.
+
+
+### Identidade estrutural (hex)
+
+A biblioteca exporta `rmr_arch_identity_hex()` com identidade fixa em hexadecimal de acordo com o alvo de compilação.
+
+Sete identidades primárias mantidas no contrato:
+
+- `0xA0640001` arm64
+- `0xA0320002` arm32
+- `0xA0860003` x86
+- `0xA8640004` x86_64
+- `0xA7640005` riscv64
+- `0xAC640006` ppc64le
+- `0xA3900007` s390x
+
+
+No caminho CI/local, o script já força `-DTINYGPT_ASM_ONLY=ON` para evitar dependência da camada C++/Python.

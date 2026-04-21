@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "rafaelia_arch_identity.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -56,6 +58,7 @@ size_t rmr_engine_run(rmr_engine_t* engine,
                       size_t output_cap,
                       rmr_report_t* report);
 const char* rmr_backend_name(void);
+uint32_t rmr_arch_identity_hex(void);
 
 /* utilitários de integridade e teoria de campos discreta */
 uint64_t rmr_merkle_root64(const uint64_t* leaves, size_t leaf_count);

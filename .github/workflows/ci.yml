@@ -38,7 +38,7 @@ jobs:
           path: artifacts/*.tar.gz
           if-no-files-found: error
 
-  android-native-addon:
+  android-native-addon-asm:
     runs-on: ubuntu-latest
     timeout-minutes: 40
 
@@ -54,15 +54,38 @@ jobs:
         with:
           ndk-version: r27c
 
-      - name: Build RafaelIA addon (armeabi-v7a + arm64-v8a)
+      - name: Build RafaelIA addon (ASM only: armeabi-v7a + arm64-v8a)
         env:
           ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
           ANDROID_API_LEVEL: "24"
+          ANDROID_ABI_LIST: "armeabi-v7a arm64-v8a"
+          RAFAELIA_REQUIRE_ASM: "1"
         run: addons/rafaelia_core/scripts/build_android_addon.sh
 
-      - name: Upload Android addon artifacts
+      - name: Upload Android addon artifacts (ASM)
         uses: actions/upload-artifact@v4
         with:
-          name: rafaelia-core-android-static-libs
+          name: rafaelia-core-android-static-libs-asm
           path: build-android-rafaelia/artifacts/*.a
+          if-no-files-found: error
+
+  asm-shell-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure ASM shell only
+        run: cmake -S . -B build-asm-shell -DCMAKE_BUILD_TYPE=Release -DTINYGPT_ASM_ONLY=ON
+
+      - name: Build ASM shell only
+        run: cmake --build build-asm-shell --config Release --target RafaelIA_core --parallel
+
+      - name: Upload ASM shell artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rafaelia-core-host-static-lib
+          path: build-asm-shell/addons/rafaelia_core/librafaelia_core.a
           if-no-files-found: error
