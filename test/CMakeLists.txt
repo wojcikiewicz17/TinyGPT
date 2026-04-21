@@ -7,9 +7,29 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(THIRD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party)
 
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/googletest/CMakeLists.txt")
-    message(FATAL_ERROR
-            "Dependência de testes ausente em '${CMAKE_CURRENT_SOURCE_DIR}/googletest'.\\n"
-            "Execute: ./scripts/bootstrap_submodules.sh")
+    if (TINYGPT_AUTO_FETCH_DEPS)
+        find_package(Git QUIET)
+        if (NOT GIT_FOUND)
+            message(FATAL_ERROR
+                    "Dependência de testes ausente em '${CMAKE_CURRENT_SOURCE_DIR}/googletest' e Git indisponível.\\n"
+                    "Execute: ./scripts/bootstrap_submodules.sh")
+        endif ()
+        message(STATUS "googletest ausente. Auto-bootstrap via git clone.")
+        execute_process(
+                COMMAND "${GIT_EXECUTABLE}" clone --depth 1 "https://github.com/google/googletest.git" "${CMAKE_CURRENT_SOURCE_DIR}/googletest"
+                RESULT_VARIABLE gtest_clone_result
+                OUTPUT_VARIABLE gtest_clone_stdout
+                ERROR_VARIABLE gtest_clone_stderr
+        )
+        if (NOT gtest_clone_result EQUAL 0)
+            message(FATAL_ERROR
+                    "Falha ao clonar googletest.\\nstdout:\\n${gtest_clone_stdout}\\nstderr:\\n${gtest_clone_stderr}")
+        endif ()
+    else ()
+        message(FATAL_ERROR
+                "Dependência de testes ausente em '${CMAKE_CURRENT_SOURCE_DIR}/googletest'.\\n"
+                "Execute: ./scripts/bootstrap_submodules.sh")
+    endif ()
 endif ()
 
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
