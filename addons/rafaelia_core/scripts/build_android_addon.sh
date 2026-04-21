@@ -11,7 +11,13 @@ OUT_DIR="${ROOT_DIR}/build-android-rafaelia"
 TOOLCHAIN="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake"
 API_LEVEL="${ANDROID_API_LEVEL:-24}"
 
-ABIS=("armeabi-v7a" "arm64-v8a")
+DEFAULT_ABIS=("armeabi-v7a" "arm64-v8a" "x86" "x86_64")
+if [[ -n "${ANDROID_ABI_LIST:-}" ]]; then
+  # shellcheck disable=SC2206
+  ABIS=(${ANDROID_ABI_LIST})
+else
+  ABIS=("${DEFAULT_ABIS[@]}")
+fi
 
 rm -rf "${OUT_DIR}"
 mkdir -p "${OUT_DIR}/artifacts"
