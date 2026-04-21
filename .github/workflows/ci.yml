@@ -80,6 +80,7 @@ jobs:
           test -f generated/all_asm/manifest.json
           test -f build-all-asm/libtinygpt_all_asm.a
           test -f build-all-asm/addons/rafaelia_core/librafaelia_core.a
+          test -f build-all-asm/geolm/libgeolm_core.a
 
       - name: Upload full ASM artifacts
         uses: actions/upload-artifact@v4
@@ -89,6 +90,7 @@ jobs:
             generated/all_asm/manifest.json
             build-all-asm/libtinygpt_all_asm.a
             build-all-asm/addons/rafaelia_core/librafaelia_core.a
+            build-all-asm/geolm/libgeolm_core.a
           if-no-files-found: error
 
   android-native-addon:

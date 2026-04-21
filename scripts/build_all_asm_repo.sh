@@ -11,4 +11,4 @@ cmake -S "${ROOT_DIR}" -B "${BUILD_DIR}" \
 cmake --build "${BUILD_DIR}" --config Release --parallel
 
 echo "[all-asm] artifacts"
-find "${BUILD_DIR}" -maxdepth 3 -type f \( -name 'libtinygpt_all_asm.a' -o -name 'librafaelia_core.a' \)
+find "${BUILD_DIR}" -maxdepth 3 -type f \( -name 'libtinygpt_all_asm.a' -o -name 'librafaelia_core.a' -o -name 'libgeolm_core.a' \)

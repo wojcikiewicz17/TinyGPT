@@ -12,8 +12,8 @@ LISTFILE = OUT_DIR / "sources.cmake"
 
 EXTS = {".c", ".cc", ".cpp", ".cxx", ".py"}
 SKIP_DIRS = {
-    ".git", "build", "build-asm-only", "build-android-rafaelia", "generated",
-    "third_party", "test/googletest", "src/TinyTorch", "addons/rafaelia_core/asm",
+    ".git", "build", "build-asm-only", "build-android-rafaelia", "build-all-asm",
+    "generated", "third_party", "test/googletest", "src/TinyTorch", "addons/rafaelia_core/asm",
 }
 
 
@@ -30,12 +30,27 @@ def sanitize_symbol(rel: str) -> str:
 
 def asm_for(symbol: str, rel: str) -> str:
     return f""".text
+#if defined(__x86_64__)
 .global {symbol}
 .type {symbol}, %function
 {symbol}:
     /* generated from: {rel} */
     xor %eax, %eax
     ret
+#elif defined(__aarch64__)
+.global {symbol}
+.type {symbol}, %function
+{symbol}:
+    /* generated from: {rel} */
+    mov w0, #0
+    ret
+#else
+.global {symbol}
+.type {symbol}, %function
+{symbol}:
+    /* generated from: {rel} */
+    .byte 0
+#endif
 """
 
 

@@ -125,6 +125,9 @@ Outputs:
 - `generated/all_asm/manifest.json` (mapping source -> generated ASM symbol)
 - `build-all-asm/libtinygpt_all_asm.a`
 - `build-all-asm/addons/rafaelia_core/librafaelia_core.a`
+- `build-all-asm/geolm/libgeolm_core.a`
+
+GeoLM ASM core API is exported by `geolm/include/geolm_api.h` and built from `geolm/asm/geolm_core.S`.
 
 ## Python binding
 
