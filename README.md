@@ -93,6 +93,16 @@ demo output:
 [INFO] Time cost: 1907 ms, speed: 83.90 token/s
 ```
 
+## ASM-only low-level pipeline (no TinyGPT core dependencies)
+
+Use this mode to build only the RafaelIA low-level backend (ASM when available, portable fallback otherwise):
+
+```bash
+scripts/build_asm_only.sh
+```
+
+This path enables `TINYGPT_ASM_ONLY=ON`, disables demo/tests/pybinding, and forces only `addons/rafaelia_core` to be built.
+
 ## Python binding
 
 ```python

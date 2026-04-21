@@ -38,6 +38,29 @@ jobs:
           path: artifacts/*.tar.gz
           if-no-files-found: error
 
+  asm-only-host:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build ASM-only pipeline
+        run: scripts/build_asm_only.sh
+
+      - name: Pack ASM-only artifacts
+        run: |
+          mkdir -p artifacts
+          cp build-asm-only/addons/rafaelia_core/librafaelia_core.a artifacts/librafaelia_core-host.a
+
+      - name: Upload ASM-only artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rafaelia-core-host-asm-only
+          path: artifacts/librafaelia_core-host.a
+          if-no-files-found: error
+
   android-native-addon:
     runs-on: ubuntu-latest
     timeout-minutes: 40
