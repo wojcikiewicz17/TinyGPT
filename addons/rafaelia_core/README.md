@@ -67,6 +67,18 @@ A seleção de backend é automática por arquitetura/flags:
 O backend ativo pode ser consultado por `vectra_backend_name()`.
 
 
+### Android NDK (CI e local)
+
+Build automatizado para `armeabi-v7a` e `arm64-v8a`:
+
+```bash
+export ANDROID_NDK_HOME=/path/to/android-ndk
+addons/rafaelia_core/scripts/build_android_addon.sh
+```
+
+Artefatos gerados em `build-android-rafaelia/artifacts/`.
+
+
 ### Mapeamento matemático implantado (núcleo RMR)
 
 - Estado toroidal `s in [0,1)^7` e ciclo periódico `x_(n+42)=x_n`.

@@ -37,3 +37,32 @@ jobs:
           name: tinygpt-linux-artifacts
           path: artifacts/*.tar.gz
           if-no-files-found: error
+
+  android-native-addon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27c
+
+      - name: Build RafaelIA addon (armeabi-v7a + arm64-v8a)
+        env:
+          ANDROID_NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+          ANDROID_API_LEVEL: "24"
+        run: addons/rafaelia_core/scripts/build_android_addon.sh
+
+      - name: Upload Android addon artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rafaelia-core-android-static-libs
+          path: build-android-rafaelia/artifacts/*.a
+          if-no-files-found: error
